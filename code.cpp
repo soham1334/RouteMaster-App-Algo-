@@ -5,7 +5,7 @@ using namespace std;
 
 class Map {
     int L; // Number of Locations
-    list<pair<int, int>>* adj; // Adjacency list
+    vector<pair<int, int>>* adj; // Adjacency list
 
 public:
     Map(int L);
@@ -23,21 +23,21 @@ private:
 
 Map::Map(int L) {
     this->L = L;
-    adj = new list<pair<int, int>>[L];
+    adj = new vector<pair<int, int>>[L];
 }
 
 void Map::addDist(int u, int v, int Distance) {
-    adj[u].push_back(make_pair(v, Distance));
-    adj[v].push_back(make_pair(u, Distance));
+    adj[u].push_back({v, Distance});
+    adj[v].push_back({u, Distance});
 }
 
-void Map::displayPath(vector<int>& parent, int j) {
-    if (parent[j] == -1)
+void Map::displayPath(vector<int>& parent, int prev) {
+    if (parent[prev] == -1)
         return;
 
-    displayPath(parent, parent[j]);
+    displayPath(parent, parent[prev]);
 
-    cout << j << " ";
+    cout << prev << " ";
 }
 
 void Map::printShortestPath(int src, int dest, vector<int>& dist, vector<int>& parent) {
@@ -48,24 +48,31 @@ void Map::printShortestPath(int src, int dest, vector<int>& dist, vector<int>& p
 }
 
 void Map::dijkstra(int src, int dest) {
-    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+    set<pair<int,int>>st;
     vector<int> dist(L, INT_MAX);
-    vector<int> parent(L, -1);
+    vector<int> parent(L, -1);  //to store the nearest neighbour in the direction of source
 
-    pq.push(make_pair(0, src));
+    st.insert({0, src});
     dist[src] = 0;
 
-    while (!pq.empty()) {
-        int u = pq.top().second;
-        pq.pop();
+    while (!st.empty()) {
+        auto p = *(st.begin());
+        st.erase(p);
 
-        for (auto& neighbor : adj[u]) {
-            int v = neighbor.first;
-            int Distance = neighbor.second;
+        int u = p.second;  //u=location
+        int dis = p.first;    //dis=minimum distance from source of that node/location
+
+        for (auto& nbr : adj[u]) {         //nbr=neighbor
+            int v = nbr.first;
+            int Distance = nbr.second;
 
             if (dist[v] > dist[u] + Distance) {
+
+                if(dist[v] != INT_MAX){
+                    st.erase({dist[v],v});
+                }
                 dist[v] = dist[u] + Distance;
-                pq.push(make_pair(dist[v], v));
+                st.insert({dist[v], v});
                 parent[v] = u;
             }
         }
@@ -127,8 +134,8 @@ int main() {
     g.addDist(6, 8, 6);
     g.addDist(7, 8, 7);
 
-    int src = 1;
-    int dest = 7;
+    int src = 0;
+    int dest = 8;
 
     g.dijkstra(src, dest);
     //g.bfs(src, dest);
