@@ -29,14 +29,65 @@
 ```
 
 ### 🎯 Key Components Summary
+## 🔁 Global Trigger Manager
 
-| Component                  | Role                                                                  |
-| -------------------------- | --------------------------------------------------------------------- |
-| **Global Trigger Manager** | Schedules jobs via cron/webhook; manages when ingestion should start. |
-| **Ingestion Job Manager**  | Maintains registry of all jobs, their states, lifecycle control.      |
-| **Ingestor**               | The core that executes `fetch → process → send`.                      |
-| **Source Plugin**          | Modular fetchers for Git, Web, or Cloud data.                         |
-| **Destination Plugin**     | Modular output handlers, like HTTP APIs.                              |
+The Global Trigger Manager is responsible for starting ingestion jobs based on external triggers. These triggers can come in two main forms:
+
+- **Cron Jobs:** Scheduled executions defined using cron expressions. For example, a user might configure a data ingestion task to run every hour or every Monday at 9 AM.
+
+- **Webhooks:** An HTTP API endpoint is exposed, and when it's called (usually by another system), it initiates the ingestion process.
+
+This component ensures that jobs start at the right time or in response to specific external events. It also validates and prevents duplicate triggers for the same job when one is already running. Think of it as the gatekeeper that decides when to start ingestion.
+
+---
+
+## 🧠 Ingestion Job Manager
+
+The Ingestion Job Manager maintains a registry of all ingestion jobs in the system. For each job, it keeps track of metadata like:
+
+- The job's unique ID  
+- Its current state (idle, running, completed, failed)  
+- The associated source and destination configurations  
+- Last run time, success/failure logs, etc.
+
+It provides programmatic functions like starting or stopping a job, querying job status, and removing or updating jobs. This manager is essential for lifecycle control, enabling you to manage multiple ingestion jobs in a coordinated way. It also plays a key role in monitoring and debugging.
+
+---
+
+## ⚙️ Ingestor
+
+The Ingestor is the core orchestration engine of the SDK. It takes a source plugin and a destination plugin and executes the ingestion pipeline:
+
+1. It initializes and uses the source plugin to fetch the data.  
+2. Optionally, it can apply a transformation or processing step.  
+3. It then sends the fetched/processed data to the destination plugin.
+
+This component is designed to be lightweight, modular, and reusable. Each Ingestor instance handles a single run of a job, making it highly testable and predictable. It’s the "worker" that does the actual work of pulling and pushing data.
+
+---
+
+## 🌐 Source Plugin
+
+A Source Plugin is a module that knows how to fetch data from a specific type of source. In your SDK, there are multiple types of source plugins planned:
+
+- Web Source Plugin: Crawls web pages via sitemaps or recursive links.  
+- Git Source Plugin: Fetches data from version control systems like Git.  
+- Cloud Storage Plugin: Pulls files from providers like Google Drive or AWS S3.
+
+Each plugin implements a common interface, ensuring consistency regardless of the data source. They encapsulate all the logic for authentication, discovery, and retrieval of data, abstracting away the complexity from the rest of the system.
+
+---
+
+## 📤 Destination Plugin
+
+The Destination Plugin is responsible for sending data to the target endpoint. In your SDK’s initial scope, this will likely include:
+
+- A generic API endpoint that accepts HTTP POST requests  
+- Support for authentication, like tokens or API keys  
+- Optional batching to improve performance or reduce network usage
+
+Like the source plugins, destination plugins follow a consistent interface, making them easily replaceable or extendable. For example, in the future, you could add a database writer, a file exporter, or even a messaging queue plugin.
+
 
 ---
 
