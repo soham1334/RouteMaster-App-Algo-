@@ -406,54 +406,131 @@ const { Ingestor, SourcePlugin, DestinationPlugin } = require("plugin-ingester-s
 
 ---
 
-## 3. 🿓️ Implementation Roadmap (3 Weeks)
+## 3. 🗓️ Implementation Roadmap (3 Weeks)
 
 ---
 
-### 🔹 **Week 1: Foundation & Orchestrator**
+### 🔹 Week 1: Foundation & Orchestrator Setup
 
-| Task                    | Details                                                        |
-| ----------------------- | -------------------------------------------------------------- |
-| ✅ Project Bootstrapping | Setup folder structure, linter, test config                    |
-| ✅ Define Interfaces     | `SourcePlugin`, `DestinationPlugin`                            |
-| ✅ Ingestor Class        | Write `Ingestor.js` to run ingestion between a pair of plugins |
-| ✅ Logging Utility       | Setup Winston or Pino                                          |
-| ✅ Initial Unit Tests    | Add basic Jest test cases for interfaces & Ingestor            |
+**Objective:** Set up the SDK structure, define interfaces, and implement the ingestion core.
+
+1. **Project Bootstrapping**  
+   - Initialize the project with `npm init` or `pnpm init`.
+   - Set up the project folder structure (as per the architecture).
+   - Configure ESLint and Prettier for code formatting.
+   - Add Jest (or Vitest) for testing.
+   - Setup Babel or TypeScript if needed for modern syntax.
+
+2. **Define Core Interfaces**  
+   - Implement abstract classes/interfaces for `SourcePlugin` and `DestinationPlugin`.
+   - Define method contracts like `initialize()`, `fetchData()`, `sendData()`, and `getStatus()`.
+
+3. **Develop Ingestor Engine**  
+   - Implement the `Ingestor.js` class.
+   - Accept source and destination plugin instances and execute the ingestion flow:
+     1. Source: Initialize → Fetch
+     2. Optional transformation placeholder
+     3. Destination: Send data or send batch
+
+4. **Logging Utility**  
+   - Create a simple `logger.js` using `Winston` or `Pino`.
+   - Export functions like `logInfo()`, `logError()`, `logDebug()` to standardize logs across modules.
+
+5. **Initial Unit Testing**  
+   - Write basic test cases for:
+     - Interface enforcement
+     - A mocked run of the Ingestor using dummy plugins
+   - Ensure Jest runs correctly with setup and teardown configured.
 
 ---
 
-### 🔹 **Week 2: Core Plugin Implementation & Triggering**
+### 🔹 Week 2: Plugin Implementation & Triggering Core
 
-| Task                     | Details                                                 |
-| ------------------------ | ------------------------------------------------------- |
-| ✅ Web Source Plugin      | Uses sitemap or recursive crawling (`cheerio`, `axios`) |
-| ✅ Git Source Plugin      | Uses `simple-git` to clone/read files                   |
-| ✅ Cloud Storage Plugin   | GDrive (OAuth), S3 (AWS SDK)                            |
-| ✅ API Destination Plugin | Supports batching, auth headers                         |
-| ✅ GlobalTriggerManager   | Cron + Webhook-based triggering                         |
-| ✅ Job Manager            | Manages job lifecycle (register/start/stop/status)      |
+**Objective:** Build essential plugins and the orchestration layer to support scheduled and on-demand ingestion.
+
+1. **Web Source Plugin**  
+   - Build the plugin to support:
+     - Basic sitemap parsing using `sitemap-parser` or regex
+     - Recursive crawling with `axios` and `cheerio`
+   - Filter and return clean page content or URLs.
+
+2. **Git Source Plugin**  
+   - Use `simple-git` to clone a repo to a temp directory.
+   - Read files under specified paths (e.g., `src/`, `docs/`).
+   - Return file content with metadata.
+
+3. **Cloud Storage Plugin (Google Drive / S3)**  
+   - For Google Drive:
+     - Use OAuth2 via `googleapis` package.
+     - List and download files from a specific folder.
+   - For AWS S3:
+     - Use `@aws-sdk/client-s3` to list objects and download files.
+     - Handle auth via IAM or access key.
+
+4. **API Destination Plugin**  
+   - Accept data (single or batch) and POST to a provided endpoint.
+   - Support:
+     - Auth headers (e.g., bearer tokens)
+     - Batch sending with configurable size
+     - Retry on failure (basic implementation)
+
+5. **Global Trigger Manager**  
+   - Use `node-cron` to schedule jobs based on cron expressions.
+   - Set up a minimal Express server to expose webhook endpoints.
+   - On cron or webhook hit, trigger the corresponding job via the Job Manager.
+
+6. **Ingestion Job Manager**  
+   - Maintain job metadata in-memory (for now).
+   - Implement functions to:
+     - Register a job
+     - Start/Stop jobs by ID
+     - Query job status and last run info
 
 ---
 
-### 🔹 **Week 3: Integrations, Docs & Testing**
+### 🔹 Week 3: Integrations, CLI, Testing & Docs
 
-| Task                                                 | Details                                        |
-| ---------------------------------------------------- | ---------------------------------------------- |
-| ✅ Plugin Loader                                      | Dynamic plugin registration via config         |
-| ✅ Write CLI or Minimal API Server                    | For testing and examples                       |
-| ✅ End-to-End Tests                                   | Simulate ingestions from source to destination |
-| ✅ Docs Writing                                       | README, API Reference, Plugin Dev Guide        |
-| ✅ Publish Package                                    | `npm publish`, scoped private/public           |
-| ✅ Optional: Add data transformation hook in Ingestor |                                                |
+**Objective:** Add polish to the SDK: integration logic, examples, docs, packaging.
+
+1. **Plugin Loader System**  
+   - Implement logic to load plugin instances dynamically from a config object.
+   - Allow easy extension of new plugins without modifying Ingestor core.
+
+2. **Minimal CLI or Local API Server**  
+   - Build a basic CLI (`index.js` or using `commander`) to test plugins and ingestion.
+   - Optional: Serve a minimal Express-based API for remote job control.
+
+3. **End-to-End Testing**  
+   - Simulate complete ingestion:
+     - Web → API
+     - Git → API
+   - Use mocks or local test servers for destination endpoints.
+   - Validate all error paths, retries, logging, and job status.
+
+4. **Write Documentation**  
+   - Create a README with setup, usage, and architecture.
+   - Add:
+     - Getting Started guide
+     - API Reference
+     - Plugin Development Guide
+   - Optional: Host docs using GitHub Pages or Docusaurus.
+
+5. **Publish SDK Package**  
+   - Prepare `package.json` with proper `main` and `types` entries.
+   - Publish to npm (public or scoped private).
+   - Tag release and push to GitHub.
+
+6. **(Optional)**: Add Hook for Data Transformation  
+   - Add a method or middleware point in `Ingestor.js` to modify or enrich data between fetch and send.
 
 ---
 
 ## 4. 📦 Final Deliverables
 
-| Deliverable                  | Description                                  |
-| ---------------------------- | -------------------------------------------- |
-| **NPM Package**              | Installable SDK via npm                      |
-| **Documentation Site**       | Hosted on GitHub Pages / Docusaurus          |
-| **Example Scripts**          | Git-to-API, Web-to-API etc.                  |
-| **Unit + Integration Tests** | > 80% test coverage                          |
-| **Plugin Dev Template**      | Starter boilerplate to create custom plugins |
+- ✅ An installable NPM SDK package.
+- ✅ Source + destination plugin implementations.
+- ✅ Fully working ingestion core (Ingestor).
+- ✅ CLI tool or test runner to demonstrate ingestion.
+- ✅ README and plugin developer documentation.
+- ✅ 80%+ test coverage for core logic.
+- ✅ Template for creating custom plugins.
