@@ -28,22 +28,24 @@
 +----------------------+           +-----------------------------+
 ```
 
-### 🎯 Key Components Summary
-## 🔁 Global Trigger Manager
-
-The Global Trigger Manager is responsible for starting ingestion jobs based on external triggers. These triggers can come in two main forms:
-
-- **Cron Jobs:** Scheduled executions defined using cron expressions. For example, a user might configure a data ingestion task to run every hour or every Monday at 9 AM.
-
-- **Webhooks:** An HTTP API endpoint is exposed, and when it's called (usually by another system), it initiates the ingestion process.
-
-This component ensures that jobs start at the right time or in response to specific external events. It also validates and prevents duplicate triggers for the same job when one is already running. Think of it as the gatekeeper that decides when to start ingestion.
+## 🎯 Key Components Summary
 
 ---
 
-## 🧠 Ingestion Job Manager
+### 🔁 Global Trigger Manager
 
-The Ingestion Job Manager maintains a registry of all ingestion jobs in the system. For each job, it keeps track of metadata like:
+The **Global Trigger Manager** is responsible for starting ingestion jobs based on external triggers. These triggers can come in two main forms:
+
+- **Cron Jobs:** Scheduled executions defined using cron expressions. For example, a user might configure a data ingestion task to run every hour or every Monday at 9 AM.
+- **Webhooks:** An HTTP API endpoint is exposed, and when it's called (usually by another system), it initiates the ingestion process.
+
+This component ensures that jobs start at the right time or in response to specific external events. It also validates and prevents duplicate triggers for the same job when one is already running. Think of it as the gatekeeper that decides *when* to start ingestion.
+
+---
+
+### 🧠 Ingestion Job Manager
+
+The **Ingestion Job Manager** maintains a registry of all ingestion jobs in the system. For each job, it keeps track of metadata like:
 
 - The job's unique ID  
 - Its current state (idle, running, completed, failed)  
@@ -54,42 +56,42 @@ It provides programmatic functions like starting or stopping a job, querying job
 
 ---
 
-## ⚙️ Ingestor
+### ⚙️ Ingestor
 
-The Ingestor is the core orchestration engine of the SDK. It takes a source plugin and a destination plugin and executes the ingestion pipeline:
+The **Ingestor** is the core orchestration engine of the SDK. It takes a source plugin and a destination plugin and executes the ingestion pipeline:
 
-1. It initializes and uses the source plugin to fetch the data.  
-2. Optionally, it can apply a transformation or processing step.  
-3. It then sends the fetched/processed data to the destination plugin.
+1. Initializes and uses the source plugin to fetch the data  
+2. Optionally applies a transformation or processing step  
+3. Sends the fetched/processed data to the destination plugin
 
 This component is designed to be lightweight, modular, and reusable. Each Ingestor instance handles a single run of a job, making it highly testable and predictable. It’s the "worker" that does the actual work of pulling and pushing data.
 
 ---
 
-## 🌐 Source Plugin
+### 🌐 Source Plugin
 
-A Source Plugin is a module that knows how to fetch data from a specific type of source. In your SDK, there are multiple types of source plugins planned:
+A **Source Plugin** is a module that knows how to fetch data from a specific type of source. The SDK supports several types of source plugins:
 
-- Web Source Plugin: Crawls web pages via sitemaps or recursive links.  
-- Git Source Plugin: Fetches data from version control systems like Git.  
-- Cloud Storage Plugin: Pulls files from providers like Google Drive or AWS S3.
+- **Web Source Plugin:** Crawls web pages via sitemaps or recursive links  
+- **Git Source Plugin:** Fetches data from version control systems like Git  
+- **Cloud Storage Plugin:** Pulls files from providers like Google Drive or AWS S3
 
-Each plugin implements a common interface, ensuring consistency regardless of the data source. They encapsulate all the logic for authentication, discovery, and retrieval of data, abstracting away the complexity from the rest of the system.
+Each plugin implements a common interface to ensure consistency, regardless of data source. They encapsulate logic for authentication, discovery, and data retrieval, abstracting away the complexity from the core system.
+
+---
+
+### 📤 Destination Plugin
+
+The **Destination Plugin** is responsible for sending data to a configured target endpoint. Initially, the SDK will support:
+
+- A **generic API endpoint** that accepts HTTP POST requests  
+- **Authentication mechanisms**, such as tokens or API keys  
+- **Batching** capabilities to improve throughput and reduce network overhead
+
+Destination plugins follow a uniform interface, making them easy to replace or extend. In the future, additional destinations like databases, cloud functions, or message queues can be supported.
 
 ---
 
-## 📤 Destination Plugin
-
-The Destination Plugin is responsible for sending data to the target endpoint. In your SDK’s initial scope, this will likely include:
-
-- A generic API endpoint that accepts HTTP POST requests  
-- Support for authentication, like tokens or API keys  
-- Optional batching to improve performance or reduce network usage
-
-Like the source plugins, destination plugins follow a consistent interface, making them easily replaceable or extendable. For example, in the future, you could add a database writer, a file exporter, or even a messaging queue plugin.
-
-
----
 
 ## 2. 🧰 Low-Level Architecture
 
