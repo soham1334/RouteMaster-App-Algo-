@@ -1,5 +1,12 @@
 # Plugin-Based Data Ingester SDK – Detailed Architecture & Roadmap
 
+
+## 🔰 Introduction
+
+The **Plugin-Based Data Ingester SDK** is a modular and extensible framework for building and orchestrating data ingestion pipelines. Designed with a plugin-first architecture, it allows developers to pull data from various sources—such as **web pages**, **Git repositories**, and **cloud storage**—and push it into structured destinations like **APIs**. The SDK supports both **scheduled (cron)** and **event-based (webhook)** triggers, enabling flexible automation workflows.
+
+This architecture document describes the system’s design, key components, technical constraints, and a week-by-week implementation roadmap. It is intended for **developers** building or extending plugins, **DevOps teams** managing deployment and integration, and **technical leads or product stakeholders** seeking a deeper understanding of the system’s structure and delivery plan.
+
 ---
 
 ## 1. ✅ High-Level Architecture
@@ -36,7 +43,7 @@
 
 The **Global Trigger Manager** is responsible for starting ingestion jobs based on external triggers. These triggers can come in two main forms:
 
-- **Cron Jobs:** Scheduled executions defined using cron expressions. For example, a user might configure a data ingestion task to run every hour or every Monday at 9 AM.
+- **Cron Jobs:** Scheduled executions defined using cron expressions. For example, a user might configure a data ingestion task to run every hour or every day like  Monday at 9 AM.
 - **Webhooks:** An HTTP API endpoint is exposed, and when it's called (usually by another system), it initiates the ingestion process.
 
 This component ensures that jobs start at the right time or in response to specific external events. It also validates and prevents duplicate triggers for the same job when one is already running. Think of it as the gatekeeper that decides *when* to start ingestion.
